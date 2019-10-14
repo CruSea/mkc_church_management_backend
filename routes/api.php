@@ -37,6 +37,7 @@ Route::group(['namespace' => 'Dashboard'], function () {
     Route::get('/prayer_request_dashboard', 'DashboardController@getPrayerRequestDashboardData');
     Route::get('/partnership_dashboard', 'DashboardController@getPartnerDashboardData');
     Route::get('/member_dashboard', 'DashboardController@getMemberDashboardData');
+    Route::get('/team_dashboard', 'DashboardController@getTeamsDashboardData');
 
     Route::get('/mobile_user_dashboard/{id}', 'DashboardController@getDailyMobileUserChartData');
     Route::get('/dashboard_users_usage/{id}', 'DashboardController@getUsersDailyUsageData');

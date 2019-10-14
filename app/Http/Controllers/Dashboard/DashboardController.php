@@ -8,11 +8,14 @@ use App\NewsFeedComment;
 use App\NewsFeedLike;
 use App\Partnership;
 use App\PrayerRequest;
+use App\Team;
+use App\TeamMember;
 use App\User;
 use App\User_log;
 use App\UserUsageLog;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
 
 class DashboardController extends Controller
 {
@@ -66,14 +69,14 @@ class DashboardController extends Controller
             return response()->json(['status'=>false, 'error'=> $exception->getMessage()],500);
         }
     }
+
     public function getMainDashboardData() {
         try{
             $mainDashboard = array();
-            $mainDashboard['published_feeds'] = NewsFeed::where('is_published', '=', true)->count();
-            $mainDashboard['mobile_clients'] = User::where('user_type_id', '=', 2)->count();
-            $mainDashboard['system_admins'] = User::where('user_type_id', '=', 1)->count();
-            $mainDashboard['users_likes'] = NewsFeedLike::count();
-            $mainDashboard['users_comments'] = NewsFeedComment::count();
+            $mainDashboard['all_members'] = Member::where('status', '=', true)->count();
+            $mainDashboard['all_team'] = Team::where('status', '=', true)->count();
+            $mainDashboard['all_team_members'] =TeamMember::distinct('member_id')->pluck('member_id')->count();
+            $mainDashboard['all_system_users'] = User::count();
             return response()->json(['status'=> true,'message'=> 'Dashboard data fetched successfully', 'main_dashboard'=>$mainDashboard], 200);
         }catch (\Exception $exception){
             return response()->json(['status'=> false,'message'=> 'Whoops! failed to find news_feed_comments'], 500);
@@ -102,17 +105,77 @@ class DashboardController extends Controller
             return response()->json(['status'=> false,'message'=> 'Whoops! failed to find news_feed_comments'], 500);
         }
     }
+
     public function getMemberDashboardData() {
         try{
             $memberDashboard = array();
-            $memberDashboard['all_members'] = Member::count();
-            $memberDashboard['all_member_requests'] = Member::where('status', '=', false)->count();
-            $memberDashboard['approved_memberships'] = Member::where('status', '=', true)->count();
+            $memberDashboard['all_members'] = Member::where('status', '=', true)->count();
+            $memberDashboard['male_members'] = Member::where('status', '=', true)
+                ->where('gender', 'LIKE', '%male')
+                ->orWhere('gender', 'LIKE', 'ወንድ')
+                ->count();
+            $memberDashboard['female_members'] = Member::where('status', '=', true)
+                ->where('gender', 'LIKE', '%female')
+                ->orWhere('gender', 'LIKE', 'ሴት')
+                ->count();
+            $memberDashboard['previous_members'] = Member::where('status', '=', false)->count();
+
             return response()->json(['status'=> true,'message'=> 'Dashboard data fetched successfully', 'member_dashboard'=>$memberDashboard], 200);
-        }catch (\Exception $exception){
-            return response()->json(['status'=> false,'message'=> 'Whoops! failed to find news_feed_comments'], 500);
+        } catch (\Exception $exception){
+            return response()->json(['status'=> false,'message'=> 'Whoops! failed to find dashboard cata'], 500);
         }
     }
+
+    public function getTeamsDashboardData() {
+        try{
+            $credential = request()->only('team_id');
+
+            $rules = [
+                'team_id' => 'required'
+            ];
+
+            $validator = Validator::make($credential, $rules);
+            if($validator->fails()) {
+                $error = $validator->messages();
+                return response()->json(['error'=> $error],500);
+            }
+
+            $team = Team::where('id', '=', $credential['team_id'])->get()->first();
+            if(! $team instanceof Team){
+                return response()->json(['error'=> 'Team not found'],404);
+            }
+
+            $team_id = $team->id;
+            $memberDashboard = array();
+            $memberDashboard['team_members'] = TeamMember::where('team_id', '=', $team_id)
+                ->where('status', '=', true)->count();
+
+            $memberDashboard['team_leaders'] = TeamMember::where('team_id', '=', $team_id)
+                ->where('status', '=', true)
+                ->where('is_leader', '=', true)
+                ->where(function($q) use ($team_id) {
+                    $q->where(function($query) use ($team_id){
+                        $query->where("is_main_leader", "=", false);
+                    })
+                        ->orWhere(function($query) use ($team_id) {
+                            $query->where("is_main_leader", "=", true);
+                        })
+                    ;
+                })
+                ->count();
+
+            $memberDashboard['team_main_leaders'] = TeamMember::where('team_id', '=', $team->id)
+                ->where('status', '=', true)
+                ->where('is_leader', '=', true)
+                ->where('is_main_leader', '=', true)
+                ->count();
+
+            return response()->json(['status'=> true,'message'=> 'Dashboard data fetched successfully', 'member_dashboard'=>$memberDashboard], 200);
+        } catch (\Exception $exception){
+            return response()->json(['status'=> false,'message'=> 'Whoops! failed to find dashboard cata'], 500);
+        }
+    }
+
     public function getPartnerDashboardData() {
         try{
             $partnerDashboard = array();
