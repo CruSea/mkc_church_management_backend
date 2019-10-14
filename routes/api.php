@@ -42,6 +42,7 @@ Route::group(['namespace' => 'Dashboard'], function () {
     Route::get('/mobile_user_dashboard/{id}', 'DashboardController@getDailyMobileUserChartData');
     Route::get('/dashboard_users_usage/{id}', 'DashboardController@getUsersDailyUsageData');
     Route::get('/daily_mobile_user_chart/{id}', 'DashboardController@getUsersDailyUsageData');
+    Route::get('/daily_member_usage_chart/{id}', 'DashboardController@getMembersUsageData');
     Route::get('/weekly_mobile_user_chart/{id}', 'DashboardController@getWeeklyMobileUserChartData');
     Route::get('/monthly_mobile_user_chart/{id}', 'DashboardController@getMonthlyMessagesCount');
 });

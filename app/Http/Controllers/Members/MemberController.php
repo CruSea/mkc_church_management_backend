@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\View;
 use Maatwebsite\Excel\Excel;
 //use Maatwebsite\Excel\Excel;
 use Barryvdh\DomPDF\PDF;
@@ -67,7 +68,10 @@ class MemberController extends Controller
 //        $pdf = Member::make('dompdf.wrapper');
 //        $pdf->loadHTML('<h1>Test</h1>');
 //        return $pdf->stream();
-        $pdf = \PDF::loadHTML($this->convert_member_data_to_html());
+
+        \PDF::setOptions(['dpi' => 150, 'defaultFont' => 'Dejavu Sans']);
+
+        $pdf = \PDF::loadHTML($this->convert_member_data_to_html())->setPaper('a4', 'landscape');
         return $pdf ->stream();
     }
 
@@ -75,6 +79,15 @@ class MemberController extends Controller
     {
         $member_data = $this->get_member_data();
         $output = '
+       <html>
+       <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <head>
+
+       
+        </head>
+        <body>
+  
      <h3 align="center">Members Data</h3>
      <table width="100%" style="border-collapse: collapse; border: 0px;">
       <tr>
@@ -99,7 +112,9 @@ class MemberController extends Controller
       </tr>
       ';
         }
-        $output .= '</table>';
+        $output .= '      
+        </body>
+        </html>';
         return $output;
     }
 
