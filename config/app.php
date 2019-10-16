@@ -168,7 +168,6 @@ return [
          * Application Service Providers...
          */
         Maatwebsite\Excel\ExcelServiceProvider::class,
-        Barryvdh\DomPDF\ServiceProvider::class,
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
@@ -177,6 +176,7 @@ return [
         Zizaco\Entrust\EntrustServiceProvider::class,
         Tymon\JWTAuth\Providers\JWTAuthServiceProvider::class,
         Laravel\Socialite\SocialiteServiceProvider::class,
+        niklasravnsborg\LaravelPdf\PdfServiceProvider::class
 
     ],
 
@@ -231,7 +231,7 @@ return [
         'JWTFactory' => Tymon\JWTAuth\Facades\JWTFactory::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
-        'PDF' => Barryvdh\DomPDF\Facade::class,
+        'PDF' => niklasravnsborg\LaravelPdf\Facades\Pdf::class
 
     ],
 
