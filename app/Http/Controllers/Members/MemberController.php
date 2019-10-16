@@ -9,6 +9,7 @@ use App\TeamMember;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
@@ -64,15 +65,21 @@ class MemberController extends Controller
         $members = Member::all();
         return $members;
     }
-    public  function pdf(){
-//        $pdf = Member::make('dompdf.wrapper');
-//        $pdf->loadHTML('<h1>Test</h1>');
+
+
+    public function pdf(){
+
+        $pdf = \PDF::loadHTML($this->convert_member_data_to_html())->stream('pdf.pdf');
+        return $pdf;
+
+//        $pdf = App::make('dompdf.wrapper');
+//        $pdf->loadHTML('<h1>Test ሮጀር</h1>');
 //        return $pdf->stream();
 
-        \PDF::setOptions(['dpi' => 150, 'defaultFont' => 'Dejavu Sans']);
-
-        $pdf = \PDF::loadHTML($this->convert_member_data_to_html())->setPaper('a4', 'landscape');
-        return $pdf ->stream();
+      /*  \PDF::setOptions(['dpi' => 150, 'defaultFont' => 'Nyala']);
+*/
+//        $pdf = \PDF2::loadHTML($this->convert_member_data_to_html())->setPaper('a4', 'landscape');
+//        return $pdf ->stream();
     }
 
     function convert_member_data_to_html()
@@ -80,43 +87,62 @@ class MemberController extends Controller
         $member_data = $this->get_member_data();
         $output = '
        <html>
-       <head>
-              <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+       <head
+       <title>የአባላት መረጃ</title>
+       <style type="text/css">
+       body {
+	font-family: \'examplefont\', sans-serif;
+}
+</style>
+       <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+       
         <head>
-
        
         </head>
         <body>
   
-     <h3 align="center">Members Data</h3>
+     <h3 align="center">የአባላት መረጃ</h3>
      <table width="100%" style="border-collapse: collapse; border: 0px;">
       <tr>
-    <th style="border: 1px solid; padding:12px;" width="20%">Full Name</th>
-    <th style="border: 1px solid; padding:12px;" width="30%">email</th>
-    <th style="border: 1px solid; padding:12px;" width="15%">gender</th>
-    <th style="border: 1px solid; padding:12px;" width="15%">Cell Phone</th>
-    <th style="border: 1px solid; padding:12px;" width="20%">Nationality</th>
-    <th style="border: 1px solid; padding:12px;" width="20%">Occupation</th>
+    <th style="border: 1px solid; padding:12px;" width="6%">ቁጥር</th>
+    <th style="border: 1px solid; padding:12px;" width="20%">ሙሉ ስም</th>
+    <th style="border: 1px solid; padding:12px;" width="17%">ኢሜይል</th>
+    <th style="border: 1px solid; padding:12px;" width="7%">ፆታ</th>
+    <th style="border: 1px solid; padding:12px;" width="10%">ስልክ</th>
+    <th style="border: 1px solid; padding:12px;" width="10%">ዜግነት</th>
+    <th style="border: 1px solid; padding:12px;" width="10%">ሴል ቡድን</th>
+    <th style="border: 1px solid; padding:12px;" width="8%">ወረዳ</th>
+    <th style="border: 1px solid; padding:12px;" width="8%">ክፍለ ከተማ</th>
+    <th style="border: 1px solid; padding:12px;" width="10%">የጋብቻ ሁኔታ</th>
    </tr>
      ';
+        $num = 0;
         foreach($member_data as $member)
         {
+            $num++;
             $output .= '
       <tr>
+       <td style="border: 1px solid; padding:12px;">'.$num.'</td>
        <td style="border: 1px solid; padding:12px;">'.$member->full_name.'</td>
        <td style="border: 1px solid; padding:12px;">'.$member->email.'</td>
        <td style="border: 1px solid; padding:12px;">'.$member->gender.'</td>
        <td style="border: 1px solid; padding:12px;">'.$member->phone_cell.'</td>
        <td style="border: 1px solid; padding:12px;">'.$member->nationality.'</td>
-       <td style="border: 1px solid; padding:12px;">'.$member->occupation.'</td>
+       <td style="border: 1px solid; padding:12px;">'.$member->church_group_place.'</td>
+       <td style="border: 1px solid; padding:12px;">'.$member->wereda.'</td>
+       <td style="border: 1px solid; padding:12px;">'.$member->sub_city.'</td>
+       <td style="border: 1px solid; padding:12px;">'.$member->marital_status.'</td>
       </tr>
       ';
         }
-        $output .= '      
+        $output .= '
+      </table>
         </body>
         </html>';
         return $output;
     }
+
+
 
 
 public function getMembers() {
