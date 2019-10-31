@@ -23,7 +23,7 @@ class MemberController extends Controller
     public function __construct(Excel $excel)
     {
         $this->excel = $excel;
-        $this->middleware('ability:,normal-mobile-user', ['only' => ['create','getSingleMobileMember']]);
+        $this->middleware('ability:,create-user', ['only' => ['create','getSingleMobileMember']]);
     }
 
     public function exportMember()
@@ -92,7 +92,7 @@ class MemberController extends Controller
        <style type="text/css">
        body {
 	font-family: \'examplefont\', sans-serif;
-}
+    }
 </style>
        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
        
@@ -299,9 +299,10 @@ public function getMembers() {
     public function create() {
         try{
             $credential = request()->only(
-                'full_name', 'photo_file', 'application_type', 'city', 'phone_cell', 'phone_work', 'phone_home',
+                'member_id','full_name', 'photo_file', 'application_type', 'city', 'phone_cell', 'phone_work', 'phone_home',
                 'email', 'birth_day', 'occupation', 'address','education_level', 'employment_position', 'gender', 'nationality', 'marital_status','salvation_date','is_baptized','baptized_date',
-                'sub_city','wereda','house_number','baptized_church','church_group_place','birth_place','emergency_contact_name','emergency_contact_phone','emergency_contact_subcity','emergency_contact_house_no'
+                'sub_city','wereda','house_number','baptized_church','church_group_place','birth_place','emergency_contact_name','emergency_contact_phone','emergency_contact_subcity','emergency_contact_house_no',
+                'have_family_fellowship', 'salvation_church'
             );
             $rules = [
                 'full_name' => 'required',
@@ -339,14 +340,15 @@ public function getMembers() {
                     'full_name', 'photo_file', 'city', 'phone_cell', 'phone_work', 'phone_home',
                     'email', 'birth_day', 'occupation', 'address','education_level', 'employment_position', 'gender', 'nationality', 'marital_status','salvation_date','is_baptized','baptized_date',
                     'sub_city','wereda','house_number','church_group_place','birth_place','emergency_contact_name',
-                    'emergency_contact_phone', 'baptized_church', 'emergency_contact_wereda','emergency_contact_subcity','emergency_contact_house_no'
+                    'emergency_contact_phone', 'baptized_church', 'emergency_contact_wereda','emergency_contact_subcity','emergency_contact_house_no',
+                    'have_family_fellowship', 'salvation_church'
                 );
 
                 $item = new Member();
                 $item->user_id = $this_user->id;
+                $item->member_id = $this->getUniqueCode();
                 $item->full_name = $credential['full_name'];
                 $item->photo_url = $image_url;
-                $item->application_type = isset($credential['application_type']) ? $credential['application_type']: null;
                 $item->city = isset($credential['city']) ? $credential['city']: null;
                 $item->sub_city = isset($credential['sub_city']) ? $credential['sub_city']: null;
                 $item->wereda = isset($credential['wereda']) ? $credential['wereda']: null;
@@ -365,6 +367,7 @@ public function getMembers() {
                 $item->gender = isset($credential['gender']) ? $credential['gender']: null;
                 $item->address = isset($credential['address']) ? $credential['address']: null;
                 $item->salvation_date = isset($credential['salvation_date']) ? $credential['salvation_date']: null;
+                $item->salvation_church = isset($credential['salvation_church']) ? $credential['salvation_church']: null;
                 $item->is_baptized = isset($credential['is_baptized']) ? $credential['is_baptized']: null;
                 $item->baptized_date = isset($credential['baptized_date']) ? $credential['baptized_date']: null;
                 $item->baptized_church = isset($credential['baptized_church']) ? $credential['baptized_church']: null;
@@ -374,6 +377,7 @@ public function getMembers() {
                 $item->emergency_contact_subcity = isset($credential['emergency_contact_subcity']) ? $credential['emergency_contact_subcity']: null;
                 $item->emergency_contact_wereda = isset($credential['emergency_contact_wereda']) ? $credential['emergency_contact_wereda']: null;
                 $item->emergency_contact_house_no = isset($credential['emergency_contact_house_no']) ? $credential['emergency_contact_house_no']: null;
+                $item->have_family_fellowship = isset($credential['have_family_fellowship']) ? $credential['have_family_fellowship']: false;
                 $item->remark = isset($credential['remark']) ? $credential['remark']: null;
                 $item->status = isset($credential['status']) ? $credential['status']: false ;
 
@@ -403,7 +407,8 @@ public function getMembers() {
             $credential = request()->only(
                 'full_name', 'photo_file', 'city', 'phone_cell', 'phone_work', 'phone_home',
                 'email', 'birth_day', 'occupation', 'address','education_level', 'employment_position', 'gender', 'nationality', 'marital_status','salvation_date','is_baptized','baptized_date',
-                'sub_city','wereda','house_number', 'baptized_church', 'church_group_place','birth_place','emergency_contact_name','emergency_contact_phone','emergency_contact_wereda', 'emergency_contact_subcity','emergency_contact_house_no'
+                'sub_city','wereda','house_number', 'baptized_church', 'church_group_place','birth_place','emergency_contact_name','emergency_contact_phone','emergency_contact_wereda', 'emergency_contact_subcity','emergency_contact_house_no',
+                'have_family_fellowship', 'salvation_church'
             );
             $rules = [
                 'full_name' => 'required',
@@ -422,17 +427,13 @@ public function getMembers() {
             $image_url = null;
             if (isset($image_file)){
                 $file_extension = strtolower($image_file->getClientOriginalExtension());
-
                 if($file_extension == "jpg" || $file_extension == "png") {
                     $posted_file_name = str_random(20) . '.' . $file_extension;
                     $destinationPath = public_path('/member_images');
                     $image_file->move($destinationPath, $posted_file_name);
                     $image_url = Controller::$API_URL . '/member_images/' .$posted_file_name;
                 }
-
             } else {
-
-
                 $image = $credential['photo_url'];  // your base64 encoded
                 $image = str_replace('data:image/png;base64,', '', $image);
                 $image = str_replace(' ', '+', $image);
@@ -441,8 +442,8 @@ public function getMembers() {
                 $image_url = Controller::$API_URL . '/member_images/' . $imageName;
             }
 
-
             $item = new Member();
+            $item->member_id = $this->getUniqueCode();
             $item->full_name = $credential['full_name'];
             $item->photo_url = $image_url;
             $item->city = isset($credential['city']) ? $credential['city']: null;
@@ -463,6 +464,7 @@ public function getMembers() {
             $item->gender = isset($credential['gender']) ? $credential['gender']: null;
             $item->address = isset($credential['address']) ? $credential['address']: null;
             $item->salvation_date = isset($credential['salvation_date']) ? $credential['salvation_date']: null;
+            $item->salvation_church = isset($credential['salvation_church']) ? $credential['salvation_church']: null;
             $item->is_baptized = isset($credential['is_baptized']) ? $credential['is_baptized']: null;
             $item->baptized_date = isset($credential['baptized_date']) ? $credential['baptized_date']: null;
             $item->baptized_church = isset($credential['baptized_church']) ? $credential['baptized_church']: null;
@@ -472,9 +474,9 @@ public function getMembers() {
             $item->emergency_contact_wereda = isset($credential['emergency_contact_wereda']) ? $credential['emergency_contact_wereda']: null;
             $item->emergency_contact_subcity = isset($credential['emergency_contact_subcity']) ? $credential['emergency_contact_subcity']: null;
             $item->emergency_contact_house_no = isset($credential['emergency_contact_house_no']) ? $credential['emergency_contact_house_no']: null;
+            $item->have_family_fellowship = isset($credential['have_family_fellowship']) ? $credential['have_family_fellowship']: null;
             $item->remark = isset($credential['remark']) ? $credential['remark']: null;
             $item->status = isset($credential['status']) ? $credential['status']: true ;
-
 
             if($item->save()){
                     return response()->json(['status'=> true, 'message'=> 'Member Successfully Created', 'result'=>$item],200);
@@ -515,7 +517,6 @@ public function getMembers() {
 
                 $oldItem->full_name = isset($credential['full_name'])? $credential['full_name']: $oldItem->full_name;
                 $oldItem->photo_url = isset($image_url)? $image_url: $oldItem->photo_url;
-                $oldItem->application_type = isset($credential['application_type'])? $credential['application_type']: $oldItem->application_type;
                 $oldItem->city = isset($credential['city'])? $credential['city']: $oldItem->city;
                 $oldItem->sub_city = isset($credential['sub_city'])? $credential['sub_city']: $oldItem->sub_city;
                 $oldItem->wereda = isset($credential['wereda'])? $credential['wereda']: $oldItem->wereda;
@@ -575,4 +576,20 @@ public function getMembers() {
             return response()->json(['status'=>false, 'message'=> 'Whoops! something went wrong', 'error'=>$exception->getMessage()],500);
         }
     }
+
+    public function getUniqueCode(){
+        $length = 5;
+        $token = "";
+        $codeAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+//        $codeAlphabet= "abcdefghijklmnopqrstuvwxyz";
+        $codeAlphabet.= "0123456789";
+        $max = strlen($codeAlphabet); // edited
+
+        for ($i=0; $i < $length; $i++) {
+            $token .= $codeAlphabet[random_int(0, $max-1)];
+        }
+        $token ="MKC-".$token;
+        return $token;
+    }
+
 }

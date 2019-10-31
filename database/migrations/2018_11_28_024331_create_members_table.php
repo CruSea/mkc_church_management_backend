@@ -15,6 +15,7 @@ class CreateMembersTable extends Migration
     {
         Schema::create('members', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('member_id')->unique();
             $table->integer('user_id')->unsigned()->nullable();
             $table->string('full_name');
             $table->string('photo_url')->nullable();
@@ -36,10 +37,12 @@ class CreateMembersTable extends Migration
             $table->string('nationality')->nullable();
             $table->string('address')->nullable();
             $table->string('salvation_date')->nullable();
+            $table->string('salvation_church')->nullable();
             $table->string('is_baptized')->nullable();
             $table->string('baptized_date')->nullable();
             $table->string('baptized_church')->nullable();
             $table->string('marital_status')->nullable();
+            $table->boolean('have_family_fellowship')->default(false);
             $table->text('emergency_contact_name')->nullable();
             $table->text('emergency_contact_phone')->nullable();
             $table->text('emergency_contact_subcity')->nullable();

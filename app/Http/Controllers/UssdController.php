@@ -10,6 +10,12 @@ class UssdController extends Controller
     //
 
 
+    public function getData(){
+        $logger = new Logger("TestLog");
+        $logger->log(Logger::INFO, "Incoming Data", request()->all());
+
+    }
+
     public function handleTest(){
         $logger = new Logger("TestLog");
         $logger->log(Logger::INFO, "Incoming Message", request()->all());
