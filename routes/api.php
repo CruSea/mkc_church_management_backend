@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/ussd_test', 'UssdController@handleTest');
 Route::post('/ussd_test', 'UssdController@handleTest');
 
+Route::post('/link_test', 'UssdController@getData');
 
 Route::group(['namespace' => 'Authenticate'], function () {
     Route::post('/authenticate', 'Authenticate@authenticate');
@@ -181,3 +182,6 @@ Route::group(['namespace' => 'Teams'], function () {
     Route::get('/team_member/leaders/all', 'TeamMembersController@getTeamLeadersAll');
     Route::get('/team_member/main_leaders/all', 'TeamMembersController@getTeamMainLeadersAll');
 });
+
+
+
