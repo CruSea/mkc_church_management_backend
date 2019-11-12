@@ -32,6 +32,7 @@ class MemberController extends Controller
     {
         return $this->excel->download(new MembersExport, 'members.xlsx');
     }
+
     public function importMember( Request $request )
     {
         $members = $this->excel->toCollection(new MembersImport, $request->file('import_file'));
