@@ -151,6 +151,7 @@ class MemberSpouseInfoControler extends Controller
             $item->member_id = $member->id;
             $item->full_name = isset($credential['full_name']) ? $credential['full_name']: null;
             $item->city = isset($credential['city']) ? $credential['city']: null;
+            $item->nationality = isset($credential['nationality']) ? $credential['nationality']: null;
             $item->phone_cell = isset($credential['phone_cell']) ? $credential['phone_cell']: null;
             $item->phone_work = isset($credential['phone_work']) ? $credential['phone_work']: null;
             $item->phone_home = isset($credential['phone_home']) ? $credential['phone_home']: null;

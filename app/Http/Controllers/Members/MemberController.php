@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\View;
 use Maatwebsite\Excel\Excel;
 //use Maatwebsite\Excel\Excel;
 use Barryvdh\DomPDF\PDF;
+use Monolog\Logger;
+
 class MemberController extends Controller
 {
 
@@ -198,6 +200,63 @@ public function getMembers() {
                 ->orWhere("occupation", "LIKE", "%$search_item%")
                 ->paginate(5);
             return response()->json(['status'=> true,'message'=> ' Member fetched successfully', 'members_data'=>$members], 200);
+        }catch (\Exception $exception){
+            return response()->json(['status'=> false,'message'=> 'Whoops! failed to find news_feeds ' . $exception->getMessage()], 500);
+        }
+    }
+
+    public function getPaginatedSearchDetail(Request $request) {
+        try{
+            $search_item = $request->get('search');
+            $searchType = $request->get('search_type');
+
+            if($searchType == 'name'){
+                $members = Member::where("full_name", "LIKE", "%$search_item%")
+                    ->paginate(5);
+                return response()->json(['status'=> true,'message'=> ' Member fetched successfully', 'members_data'=>$members], 200);
+            }
+
+            else if($searchType == 'phone'){
+                $members = Member::where("phone_cell", "LIKE", "%$search_item%")
+                    ->paginate(5);
+                return response()->json(['status'=> true,'message'=> ' Member fetched successfully', 'members_data'=>$members], 200);
+            }
+
+            else if($searchType == 'email'){
+                $members = Member::where("email", "LIKE", "%$search_item%")
+                    ->paginate(5);
+                return response()->json(['status'=> true,'message'=> ' Member fetched successfully', 'members_data'=>$members], 200);
+            }
+            else if($searchType == 'gender'){
+                $members = Member::where("gender", "LIKE", "%$search_item%")
+                    ->paginate(5);
+                return response()->json(['status'=> true,'message'=> ' Member fetched successfully', 'members_data'=>$members], 200);
+            }
+            else if($searchType == 'city'){
+                $members = Member::where("city", "LIKE", "%$search_item%")
+                    ->paginate(5);
+                return response()->json(['status'=> true,'message'=> ' Member fetched successfully', 'members_data'=>$members], 200);
+            }
+            else if($searchType == 'subcity'){
+                $members = Member::where("sub_city", "LIKE", "%$search_item%")
+                    ->paginate(5);
+                return response()->json(['status'=> true,'message'=> ' Member fetched successfully', 'members_data'=>$members], 200);
+            }
+            else if($searchType == 'educational_status'){
+                $members = Member::where("educational_status", "LIKE", "%$search_item%")
+                    ->paginate(5);
+                return response()->json(['status'=> true,'message'=> ' Member fetched successfully', 'members_data'=>$members], 200);
+            }
+            else if($searchType == 'marital_status'){
+                $members = Member::where("marital_status", "LIKE", "%$search_item%")
+                    ->paginate(5);
+                return response()->json(['status'=> true,'message'=> ' Member fetched successfully', 'members_data'=>$members], 200);
+            }
+            else{
+                $members = [];
+                return response()->json(['status'=> true,'message'=> ' Member fetched successfully', 'members_data'=>$members], 200);
+            }
+
         }catch (\Exception $exception){
             return response()->json(['status'=> false,'message'=> 'Whoops! failed to find news_feeds ' . $exception->getMessage()], 500);
         }

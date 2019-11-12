@@ -18,3 +18,6 @@ public/playlist_images/*.*
 public/news_feeds_images/*.*
 /public/news_feeds_images/*.*
 /public/member_images/*.*
+/public/previous_church_images/*.*
+/public/donation_report_images/*.*
+/public/prayer_request_images/*.*
