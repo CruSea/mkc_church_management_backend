@@ -157,7 +157,7 @@ class MemberPreviousChurchController extends Controller
                     $destinationPath = public_path('/previous_church_images');
                     $image_file->move($destinationPath, $posted_file_name);
 //                    $image_url = '/previous_church_images/' . $posted_file_name;
-                    $image_url = Controller::$API_URL .'previous_church_images/' .$posted_file_name;
+                    $image_url = Controller::$API_URL .'/previous_church_images/' .$posted_file_name;
                 }
                 else {
                     return response()->json(['success' => false, 'error' => "The uploaded file does not have a valid image extension."], 500);
@@ -214,7 +214,7 @@ class MemberPreviousChurchController extends Controller
                         $destinationPath = public_path('/previous_church_images');
                         $image_file->move($destinationPath, $posted_file_name);
 //                    $image_url = '/previous_church_images/' . $posted_file_name;
-                        $image_url = Controller::$API_URL .'previous_church_images/' .$posted_file_name;
+                        $image_url = Controller::$API_URL .'/previous_church_images/' .$posted_file_name;
                     } else {
                         return response()->json(['success' => false, 'error' => "The uploaded file does not have a valid image extension."], 500);
                     }
