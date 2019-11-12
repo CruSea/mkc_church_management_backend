@@ -100,6 +100,7 @@ Route::group(['namespace' => 'PlaylistManager'], function () {
 Route::group(['namespace' => 'Members'], function () {
     Route::get('/members', 'MemberController@getMembers');
     Route::get('/search_members', 'MemberController@getPaginatedSearch');
+    Route::get('/search_members_detail', 'MemberController@getPaginatedSearchDetail');
     Route::get('/search_members_not_in_team', 'MemberController@getPaginatedSearchNotInTeam');
     Route::get('/mobile_member', 'MemberController@getSingleMobileMember');
     Route::get('/membership_requests', 'MemberController@getMemberRequests');
@@ -168,6 +169,7 @@ Route::group(['namespace' => 'Teams'], function () {
     Route::get('/team_categories', 'TeamsController@getCategories');
     Route::post('/team_category', 'TeamsController@createCategory');
     Route::post('/team_category/update', 'TeamsController@updateCategory');
+    Route::get('/team_categories/paginated', 'TeamsController@getCategoriesPaginated');
     Route::delete('/team_category/{id}', 'TeamsController@deleteCategory');
 
     //team Members
