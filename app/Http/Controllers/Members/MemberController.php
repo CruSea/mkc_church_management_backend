@@ -366,7 +366,7 @@ public function getMembers() {
             );
             $rules = [
                 'full_name' => 'required',
-                'email' =>'required|email|max:255',
+//                'email' =>'required|email|max:255',
                 'phone_cell' =>'required|numeric',
             ];
 
