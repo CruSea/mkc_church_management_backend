@@ -561,6 +561,7 @@ public function getMembers() {
             $rules = [
                 'id' => 'required'
             ];
+
             $validator = Validator::make($credential, $rules);
             if($validator->fails()) {
                 $error = $validator->messages();
@@ -568,12 +569,19 @@ public function getMembers() {
             }
             $oldItem = Member::where('id', '=', $credential['id'])->first();
             if($oldItem instanceof Member) {
-                $image =  $credential['photo_url'];  // your base64 encoded
-                $image = str_replace('data:image/png;base64,', '', $image);
-                $image = str_replace(' ', '+', $image);
-                $imageName = str_random(10).'.'.'png';
-                \File::put(public_path( '/member_images/' ). $imageName, base64_decode($image));
-                $image_url = Controller::$API_URL . '/member_images/' .$imageName;
+
+                $image_file = request()->file('image_file');
+
+                $image_url = null;
+                if (isset($image_file)){
+                    $file_extension = strtolower($image_file->getClientOriginalExtension());
+                    if($file_extension == "jpg" || $file_extension == "png") {
+                        $posted_file_name = str_random(20) . '.' . $file_extension;
+                        $destinationPath = public_path('/member_images');
+                        $image_file->move($destinationPath, $posted_file_name);
+                        $image_url = Controller::$API_URL . '/member_images/' .$posted_file_name;
+                    }
+                }
 
                 $oldItem->full_name = isset($credential['full_name'])? $credential['full_name']: $oldItem->full_name;
                 $oldItem->photo_url = isset($image_url)? $image_url: $oldItem->photo_url;
@@ -589,9 +597,7 @@ public function getMembers() {
                 $oldItem->email = isset($credential['email'])? $credential['email']: $oldItem->email;
                 $oldItem->birth_day = isset($credential['birth_day'])? $credential['birth_day']: $oldItem->birth_day;
                 $oldItem->birth_place = isset($credential['birth_place'])? $credential['birth_place']: $oldItem->birth_place;
-                $oldItem->birth_place = isset($credential['birth_place'])? $credential['birth_place']: $oldItem->birth_place;
                 $oldItem->occupation = isset($credential['occupation'])? $credential['occupation']: $oldItem->occupation;
-                $oldItem->employment_place = isset($credential['employment_place'])? $credential['employment_place']: $oldItem->employment_place;
                 $oldItem->employment_position = isset($credential['employment_position'])? $credential['employment_position']: $oldItem->employment_position;
                 $oldItem->gender = isset($credential['gender'])? $credential['gender']: $oldItem->gender;
                 $oldItem->address = isset($credential['address'])? $credential['address']: $oldItem->address;

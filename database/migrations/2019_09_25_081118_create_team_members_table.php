@@ -22,9 +22,9 @@ class CreateTeamMembersTable extends Migration
             $table->boolean('status')->default(true);
             $table->timestamps();
 
-            $table->unique('team_id', 'member_id');
+            $table->unique(['team_id', 'member_id']);
             $table->foreign('team_id')->references('id')->on('teams')->onDelete('CASCADE');
-            $table->foreign('member_id')->references('id')->on('members')->onDelete('set null');
+            $table->foreign('member_id')->references('id')->on('members')->onDelete('CASCADE');
 
         });
     }

@@ -9,6 +9,7 @@ use App\TeamMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Monolog\Logger;
 
 class TeamMembersController extends Controller
 {
@@ -185,6 +186,7 @@ class TeamMembersController extends Controller
 
 
     public function create() {
+        $log = new Logger('Test');
         try{
             $credential = request()->only(
                 'team_id', 'member_id', 'is_leader', 'is_main_leader', 'status'
@@ -193,6 +195,8 @@ class TeamMembersController extends Controller
                 'team_id' => 'required',
                 'member_id' => 'required'
             ];
+
+            $log->log(Logger::INFO, "Requests", [$credential]);
 
             $validator = Validator::make($credential, $rules);
             if($validator->fails()) {
@@ -213,6 +217,8 @@ class TeamMembersController extends Controller
             $member = Member::where('id', '=', $credential['member_id'])->get()->first();
             if($member instanceof Member){
                 $item->member_id = $member->id;
+                $log->log(Logger::INFO, "Requests", ["Memeber found"]);
+
             }
             else{
                 return response()->json(['status'=>false, 'message'=> 'Whoops! Member not found', 'error'=>'failed to find Member!'],500);
@@ -221,6 +227,8 @@ class TeamMembersController extends Controller
             $item->is_leader = isset($credential['is_leader']) ? $credential['is_leader']: false;
             $item->is_main_leader = isset($credential['is_main_leader']) ? $credential['is_main_leader']: false;
             $item->status = isset($credential['status']) ? $credential['status']: true ;
+
+            $log->log(Logger::INFO, "Requests", [$item]);
 
             if($item->save()){
                 return response()->json(['status'=> true, 'message'=> 'Team Member Successfully Created', 'result'=>$item],200);
