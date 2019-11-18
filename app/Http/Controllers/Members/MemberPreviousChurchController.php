@@ -9,6 +9,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Monolog\Logger;
 
 class MemberPreviousChurchController extends Controller
 {
@@ -244,26 +245,46 @@ class MemberPreviousChurchController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function update() {
+
         try{
             $credential = request()->only(
                 'id', 'member_id', 'church_name', 'leaving_reason', 'was_member', 'duration'
             );
 
             $rules = [
-                'id' => 'required',
+                'member_id' => 'required',
             ];
             $validator = Validator::make($credential, $rules);
             if($validator->fails()) {
                 $error = $validator->messages();
                 return response()->json(['error'=> $error],500);
             }
+
             $oldItem = MemberPreviousChurches::where('id', '=', $credential['id'])->first();
             if($oldItem instanceof MemberPreviousChurches) {
+
+                $image_file = request()->file('image_file');
+                $image_url = null;
+                if (isset($image_file)) {
+                    $file_extension = strtolower($image_file->getClientOriginalExtension());
+
+                    if ($file_extension == "jpg" || $file_extension == "png") {
+                        $posted_file_name = str_random(20) . '.' . $file_extension;
+                        $destinationPath = public_path('/previous_church_images');
+                        $image_file->move($destinationPath, $posted_file_name);
+//                    $image_url = '/previous_church_images/' . $posted_file_name;
+                        $image_url = Controller::$API_URL .'/previous_church_images/' .$posted_file_name;
+                    } else {
+                        return response()->json(['success' => false, 'error' => "The uploaded file does not have a valid image extension."], 500);
+                    }
+                }
+
                 $oldItem->member_id = isset($credential['member_id'])? $credential['member_id']: $oldItem->member_id;
                 $oldItem->church_name = isset($credential['church_name'])? $credential['church_name']: $oldItem->church_name;
                 $oldItem->leaving_reason = isset($credential['leaving_reason'])? $credential['leaving_reason']: $oldItem->leaving_reason;
                 $oldItem->was_member = isset($credential['was_member'])? $credential['was_member']: $oldItem->was_member;
                 $oldItem->duration = isset($credential['duration'])? $credential['duration']: $oldItem->duration;
+                $oldItem->image_url = isset($image_url)? $image_url: $oldItem->image_url;
 
                 if($oldItem->update()){
                     return response()->json(['status'=> true, 'message'=> 'Item Successfully Updated', 'result'=>$oldItem],200);
@@ -271,7 +292,35 @@ class MemberPreviousChurchController extends Controller
                     return response()->json(['status'=>false, 'message'=> 'Whoops! unable to update Item', 'error'=>'failed to update '],500);
                 }
             } else {
-                return response()->json(['status'=>false, 'message'=> 'Whoops! unable to find item with ID: '.$credential['id'], 'error'=>'Item not found'],500);
+                $image_file = request()->file('image_file');
+                $image_url = null;
+                if (isset($image_file)) {
+                    $file_extension = strtolower($image_file->getClientOriginalExtension());
+
+                    if ($file_extension == "jpg" || $file_extension == "png") {
+                        $posted_file_name = str_random(20) . '.' . $file_extension;
+                        $destinationPath = public_path('/previous_church_images');
+                        $image_file->move($destinationPath, $posted_file_name);
+//                    $image_url = '/previous_church_images/' . $posted_file_name;
+                        $image_url = Controller::$API_URL .'/previous_church_images/' .$posted_file_name;
+                    } else {
+                        return response()->json(['success' => false, 'error' => "The uploaded file does not have a valid image extension."], 500);
+                    }
+                }
+
+                $item = new MemberPreviousChurches();
+                $item->member_id = isset($credential['member_id'])? $credential['member_id']: null;
+                $item->church_name = isset($credential['church_name'])? $credential['church_name']: null;
+                $item->leaving_reason = isset($credential['leaving_reason'])? $credential['leaving_reason']: null;
+                $item->was_member = isset($credential['was_member'])? $credential['was_member']: null;
+                $item->duration = isset($credential['duration'])? $credential['duration']: null;
+                $item->image_url = isset($image_url)? $image_url: null;
+
+                if($item->save()){
+                    return response()->json(['status'=> true, 'message'=> 'Item Successfully Updated', 'result'=>$item],200);
+                } else {
+                    return response()->json(['status'=>false, 'message'=> 'Whoops! unable to update Item', 'error'=>'failed to update '],500);
+                }
             }
         } catch (\Exception $exception) {
             return response()->json(['status'=>false, 'message'=> 'Whoops! something went wrong', 'error'=>$exception->getMessage()],500);

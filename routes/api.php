@@ -109,10 +109,12 @@ Route::group(['namespace' => 'Members'], function () {
     Route::post('/new_member', 'MemberController@addMembearAdmin');
     Route::post('/member_update', 'MemberController@update');
     Route::get('/members/not_in_team', 'MemberController@getMembersNotInTeam');
+    Route::get('/member/{id}', 'MemberController@show');
     Route::delete('/member/{id}', 'MemberController@delete');
     Route::post('/member_spouse', 'MemberSpouseInfoControler@create');
     Route::post('/member_spouse_admin', 'MemberSpouseInfoControler@createForAdmin');
     Route::put('/member_spouse_info', 'MemberSpouseInfoControler@update');
+    Route::post('/member_spouse_info/update', 'MemberSpouseInfoControler@update');
     Route::post('/member_children', 'MemberChildrenController@create');
     Route::post('/member_children_mass', 'MemberChildrenController@createMass');
     Route::put('/member_children_info', 'MemberChildrenController@update');
@@ -120,6 +122,7 @@ Route::group(['namespace' => 'Members'], function () {
     Route::post('/member_previous_church', 'MemberPreviousChurchController@create');
     Route::post('/member_previous_church_admin', 'MemberPreviousChurchController@createAdmin');
     Route::put('/member_previous_church_update', 'MemberPreviousChurchController@update');
+    Route::post('/member_previous_church_update_2', 'MemberPreviousChurchController@update');
     Route::post('/member_previous_church_mass', 'MemberPreviousChurchController@createMass');
     Route::get('/export', 'MemberController@exportMember');
     Route::post('/import', 'MemberController@importMember');

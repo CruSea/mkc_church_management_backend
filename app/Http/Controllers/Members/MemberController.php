@@ -359,7 +359,7 @@ public function getMembers() {
     public function create() {
         try{
             $credential = request()->only(
-                'member_id','full_name', 'photo_file', 'application_type', 'city', 'phone_cell', 'phone_work', 'phone_home',
+                'member_id','full_name','photo_file', 'application_type', 'city', 'phone_cell', 'phone_work', 'phone_home',
                 'email', 'birth_day', 'occupation', 'address','education_level', 'employment_position', 'gender', 'nationality', 'marital_status','salvation_date','is_baptized','baptized_date',
                 'sub_city','wereda','house_number','baptized_church','church_group_place','birth_place','emergency_contact_name','emergency_contact_phone','emergency_contact_subcity','emergency_contact_house_no',
                 'have_family_fellowship', 'salvation_church'
@@ -388,7 +388,7 @@ public function getMembers() {
                         $posted_file_name = str_random(20) . '.' . $file_extension;
                         $destinationPath = public_path('/member_images');
                         $image_file->move($destinationPath, $posted_file_name);
-                        $image_url = 'http://api.prophet-jeremiah.agelgel.net/member_images/' . $posted_file_name;
+                        $image_url = Controller::$API_URL . '/member_images/' . $posted_file_name;
                     }
                     else {
                         return response()->json(['success' => false, 'error' => "The uploaded file does not have a valid image extension."], 500);
@@ -472,7 +472,7 @@ public function getMembers() {
             );
             $rules = [
                 'full_name' => 'required',
-                'email' =>'required|unique:members,email|max:255',
+//                'email' =>'required|unique:members,email|max:255',
                 'phone_cell' =>'required|numeric',
             ];
 
@@ -484,22 +484,29 @@ public function getMembers() {
 
             $image_file = request()->file('image_file');
 
+            $photo_url = request()->file('photo_url');
+
             $image_url = null;
-            if (isset($image_file)){
-                $file_extension = strtolower($image_file->getClientOriginalExtension());
-                if($file_extension == "jpg" || $file_extension == "png") {
-                    $posted_file_name = str_random(20) . '.' . $file_extension;
-                    $destinationPath = public_path('/member_images');
-                    $image_file->move($destinationPath, $posted_file_name);
-                    $image_url = Controller::$API_URL . '/member_images/' .$posted_file_name;
-                }
-            } else {
+            if (isset($photo_url)){
                 $image = $credential['photo_url'];  // your base64 encoded
                 $image = str_replace('data:image/png;base64,', '', $image);
                 $image = str_replace(' ', '+', $image);
                 $imageName = str_random(10) . '.' . 'png';
                 \File::put(public_path('/member_images/') . $imageName, base64_decode($image));
                 $image_url = Controller::$API_URL . '/member_images/' . $imageName;
+            }
+            else if (isset($image_file)){
+                $file_extension = strtolower($image_file->getClientOriginalExtension());
+
+                if($file_extension == "jpg" || $file_extension == "png") {
+                    $posted_file_name = str_random(20) . '.' . $file_extension;
+                    $destinationPath = public_path('/member_images');
+                    $image_file->move($destinationPath, $posted_file_name);
+                    $image_url = Controller::$API_URL . '/member_images/' . $posted_file_name;
+                }
+                else {
+                    return response()->json(['success' => false, 'error' => "The uploaded file does not have a valid image extension."], 500);
+                }
             }
 
             $item = new Member();
@@ -642,6 +649,23 @@ public function getMembers() {
             return response()->json(['status'=>false, 'message'=> 'Whoops! something went wrong', 'error'=>$exception->getMessage()],500);
         }
     }
+
+    public function show($id) {
+        try{
+            $item = Member::where('id', '=', $id)
+                ->with('children','spouse','member_previous_church')
+                ->first();
+            if($item instanceof Member) {
+                return response()->json(['status'=> true, 'message'=> 'Item found!', 'result'=> $item],200);
+            }
+            else {
+                return response()->json(['status'=>false, 'message'=> 'Whoops! failed to find item', 'error'=>'failed to find item'],500);
+            }
+        }catch (\Exception $exception){
+            return response()->json(['status'=>false, 'message'=> 'Whoops! something went wrong', 'error'=>$exception->getMessage()],500);
+        }
+    }
+
 
     public function getUniqueCode(){
         $length = 5;
